@@ -2,6 +2,7 @@ import { Outlet } from "react-router";
 import type { Route } from "./+types/layout.app";
 import { Sidebar } from "~/components/sidebar";
 import { DevUI } from "~/components/dev-ui";
+import { useNotificationFeedPrototype } from "~/components/notification-feed.prototype";
 import { Toaster } from "sonner";
 import { getCurrentUserId, getDevCountry } from "~/lib/session";
 import { getCountryTierInfo, COUNTRIES } from "~/lib/ppp";
@@ -226,6 +227,7 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
     countries,
     isTeamAdmin: userIsTeamAdmin,
   } = loaderData;
+  const feed = useNotificationFeedPrototype(currentUser, userIsTeamAdmin);
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -233,10 +235,14 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
         currentUser={currentUser}
         recentCourses={recentCourses}
         isTeamAdmin={userIsTeamAdmin}
+        headerSlot={feed.sidebarHeader}
+        navTopSlot={feed.sidebarNavTop}
       />
       <main className="flex-1 overflow-y-auto">
-        <Outlet />
+        {feed.mainOverride ?? <Outlet />}
       </main>
+      {feed.floating}
+      {feed.switcher}
       <DevUI
         users={users}
         currentUser={currentUser}
