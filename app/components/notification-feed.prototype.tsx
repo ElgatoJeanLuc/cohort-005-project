@@ -528,13 +528,22 @@ function VariantABell({ state }: { state: FeedState }) {
                   state.open(n);
                 }}
                 className={cn(
-                  "flex w-full gap-3 border-b px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-accent",
-                  !n.read && "bg-primary/5"
+                  "flex w-full gap-3 border-b border-l-4 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-blue-50 dark:hover:bg-blue-950/40",
+                  n.read
+                    ? "border-l-transparent"
+                    : "border-l-red-500 bg-red-50 dark:bg-red-950/30"
                 )}
               >
                 <UserAvatar name={n.actor} avatarUrl={null} className="shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-muted-foreground">
+                  <p
+                    className={cn(
+                      "text-sm",
+                      n.read
+                        ? "text-muted-foreground"
+                        : "font-medium text-foreground"
+                    )}
+                  >
                     <RichText text={n.text} />
                   </p>
                   {n.excerpt && (
@@ -547,7 +556,10 @@ function VariantABell({ state }: { state: FeedState }) {
                   </p>
                 </div>
                 {!n.read && (
-                  <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
+                  <span
+                    title="Unread"
+                    className="mt-1.5 size-2.5 shrink-0 rounded-full bg-red-600 ring-2 ring-red-200 dark:ring-red-900"
+                  />
                 )}
               </button>
             ))}
