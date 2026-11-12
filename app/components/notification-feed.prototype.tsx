@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { UserAvatar } from "~/components/user-avatar";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { PrototypeSwitcher } from "~/components/prototype-switcher";
 
 type NotificationType =
@@ -552,6 +552,13 @@ function VariantABell({ state }: { state: FeedState }) {
                     <p className="mt-0.5 truncate text-xs text-muted-foreground/80">
                       “{n.excerpt}”
                     </p>
+                  )}
+                  {typeInfo[n.type].needsAction && (
+                    // A span, not a Button: the row is already a button, and
+                    // the click opens the Notification like the row does.
+                    <span className={cn(buttonVariants({ size: "xs" }), "mt-2")}>
+                      {typeInfo[n.type].needsAction}
+                    </span>
                   )}
                   <p className="mt-1 text-xs text-muted-foreground/70">
                     {timeAgo(n.createdAt)}
