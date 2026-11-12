@@ -451,8 +451,9 @@ export function useNotificationFeedPrototype(
     sidebarHeader: variant === "A" ? <VariantABell state={state} /> : null,
     sidebarNavTop: variant === "B" ? <VariantBNavItem state={state} /> : null,
     mainOverride:
-      variant === "B" && searchParams.get("feed") === "1" ? (
-        <VariantBPage state={state} />
+      (variant === "A" || variant === "B") &&
+      searchParams.get("feed") === "1" ? (
+        <VariantBPage state={state} variantA={variant === "A"} />
       ) : null,
     floating: variant === "C" ? <VariantCDrawer state={state} /> : null,
   };
@@ -471,6 +472,7 @@ interface FeedState {
 
 function VariantABell({ state }: { state: FeedState }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [, setFeedOpen] = useFeedOpen();
   const ref = useRef<HTMLDivElement>(null);
   const unseen = state.items.filter((n) => n.createdAt > state.seenAt).length;
 
@@ -564,11 +566,20 @@ function VariantABell({ state }: { state: FeedState }) {
               </button>
             ))}
           </div>
-          {state.items.length > 8 && (
-            <div className="border-t px-4 py-2 text-center text-xs text-muted-foreground">
-              Showing the latest 8
-            </div>
-          )}
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              setFeedOpen(true);
+            }}
+            className="w-full border-t px-4 py-2.5 text-center text-sm font-medium text-primary transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/40"
+          >
+            See all Notifications
+            {state.items.length > 8 && (
+              <span className="ml-1 text-muted-foreground">
+                ({state.items.length})
+              </span>
+            )}
+          </button>
         </div>
       )}
     </div>
@@ -610,9 +621,20 @@ function VariantBNavItem({ state }: { state: FeedState }) {
   );
 }
 
-function VariantBPage({ state }: { state: FeedState }) {
+// With `variantA`, this is A's "See all" page: A's unread styling, opening it
+// clears the bell count, and nothing can be marked unread again.
+function VariantBPage({
+  state,
+  variantA = false,
+}: {
+  state: FeedState;
+  variantA?: boolean;
+}) {
   const [isOpen] = useFeedOpen();
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  useEffect(() => {
+    if (variantA && isOpen) state.markSeen();
+  }, [variantA, isOpen, state.items.length]);
   if (!isOpen) return null;
 
   const shown = state.items.filter((n) => filter === "all" || !n.read);
@@ -677,8 +699,15 @@ function VariantBPage({ state }: { state: FeedState }) {
                   key={n.id}
                   onClick={() => state.open(n)}
                   className={cn(
-                    "group flex cursor-pointer gap-4 p-4 transition-colors hover:bg-accent/50",
-                    !n.read && "bg-primary/5"
+                    "group flex cursor-pointer gap-4 p-4 transition-colors",
+                    variantA
+                      ? cn(
+                          "border-l-4 hover:bg-blue-50 dark:hover:bg-blue-950/40",
+                          n.read
+                            ? "border-l-transparent"
+                            : "border-l-red-500 bg-red-50 dark:bg-red-950/30"
+                        )
+                      : cn("hover:bg-accent/50", !n.read && "bg-primary/5")
                   )}
                 >
                   <div
@@ -700,7 +729,8 @@ function VariantBPage({ state }: { state: FeedState }) {
                     <p
                       className={cn(
                         "text-sm",
-                        n.read ? "text-muted-foreground" : "text-foreground"
+                        n.read ? "text-muted-foreground" : "text-foreground",
+                        variantA && !n.read && "font-medium"
                       )}
                     >
                       <RichText text={n.text} />
@@ -718,17 +748,26 @@ function VariantBPage({ state }: { state: FeedState }) {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-2">
                     {!n.read && (
-                      <span className="size-2.5 rounded-full bg-primary" />
+                      <span
+                        className={cn(
+                          "size-2.5 rounded-full",
+                          variantA
+                            ? "bg-red-600 ring-2 ring-red-200 dark:ring-red-900"
+                            : "bg-primary"
+                        )}
+                      />
                     )}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        state.markRead(n.id, !n.read);
-                      }}
-                      className="text-xs text-muted-foreground opacity-0 transition-opacity hover:text-foreground hover:underline group-hover:opacity-100"
-                    >
-                      Mark as {n.read ? "unread" : "read"}
-                    </button>
+                    {!(variantA && n.read) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          state.markRead(n.id, !n.read);
+                        }}
+                        className="text-xs text-muted-foreground opacity-0 transition-opacity hover:text-foreground hover:underline group-hover:opacity-100"
+                      >
+                        Mark as {n.read ? "unread" : "read"}
+                      </button>
+                    )}
                   </div>
                 </div>
               );
