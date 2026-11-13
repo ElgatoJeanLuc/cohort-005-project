@@ -2070,6 +2070,58 @@ This course is still in draft while the cluster examples are rewritten against t
 
   console.log(`Created ${countRows(schema.lessonProgress)} lesson progress records.`);
 
+  // ─── Bookmarks and Notes ───
+  // A Student's own flags and writing on Lessons in courses they are enrolled
+  // in. Nobody else sees them.
+
+  const emma = studentByEmail("emma.wilson@student.dev");
+  const james = studentByEmail("james.park@student.dev");
+  const olivia = studentByEmail("olivia.martinez@student.dev");
+
+  function bookmark(userId: number, lessonId: number, createdDaysAgo: number) {
+    return { userId, lessonId, createdAt: daysAgo(createdDaysAgo) };
+  }
+
+  db.insert(schema.bookmarks)
+    .values([
+      bookmark(emma.id, course1LessonIds[4], 44),
+      bookmark(emma.id, course1LessonIds[12], 37),
+      bookmark(emma.id, course2LessonIds[6], 33),
+      bookmark(james.id, course1LessonIds[9], 30),
+      bookmark(olivia.id, course2LessonIds[2], 24),
+    ])
+    .run();
+
+  db.insert(schema.notes)
+    .values([
+      {
+        userId: emma.id,
+        lessonId: course1LessonIds[4],
+        body: "Come back to this before the final project.\nThe second example is the one that clicked.",
+        createdAt: daysAgo(44),
+        updatedAt: daysAgo(20),
+      },
+      {
+        userId: emma.id,
+        lessonId: course2LessonIds[6],
+        body: "Try the exercise again without looking at the solution.",
+        createdAt: daysAgo(33),
+        updatedAt: daysAgo(33),
+      },
+      {
+        userId: olivia.id,
+        lessonId: course1LessonIds[1],
+        body: "Set up the project locally first — the video skips that step.",
+        createdAt: daysAgo(32),
+        updatedAt: daysAgo(31),
+      },
+    ])
+    .run();
+
+  console.log(
+    `Created ${countRows(schema.bookmarks)} bookmarks and ${countRows(schema.notes)} notes.`
+  );
+
   // ─── Quiz Attempts ───
 
   // Helper to record a quiz attempt with answers
@@ -2849,6 +2901,9 @@ This course is still in draft while the cluster examples are rewritten against t
   console.log(`  Enrollments: ${countRows(schema.enrollments)}`);
   console.log(`  Course ratings: ${countRows(schema.courseRatings)}`);
   console.log(`  Lesson comments: ${countRows(schema.comments)}`);
+  console.log(
+    `  Bookmarks: ${countRows(schema.bookmarks)}, notes: ${countRows(schema.notes)}`
+  );
   console.log(
     `  Lesson progress: ${countRows(schema.lessonProgress)} (${countRows(schema.lessonProgress, eq(schema.lessonProgress.status, LessonProgressStatus.Completed))} completed)`
   );
