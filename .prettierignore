@@ -1,0 +1,17 @@
+# Generated
+drizzle/
+.react-router/
+build/
+package-lock.json
+
+# Agent skills and worktrees
+.claude/
+.agents/
+
+# Local output
+reports/
+.outbox/
+request-logger/logs/
+
+# Written by ESLint (--suppress-all / --prune-suppressions)
+eslint-suppressions.json
