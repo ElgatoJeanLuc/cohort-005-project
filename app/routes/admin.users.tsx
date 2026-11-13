@@ -5,7 +5,8 @@ import { z } from "zod";
 import type { Route } from "./+types/admin.users";
 import { getCurrentUserId } from "~/lib/session";
 import { parseFormData } from "~/lib/validation";
-import { UserRole, users } from "~/db/schema";
+import { NotificationType, UserRole, users } from "~/db/schema";
+import { recordNotification } from "~/lib/notifications.server";
 import { db } from "~/db";
 import { eq } from "drizzle-orm";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
@@ -125,7 +126,22 @@ export async function action({ request }: Route.ActionArgs) {
 
   if (intent === "update-role") {
     const { userId, role } = parsed.data;
+    const user = getUserById(userId);
+    if (!user) throw data("User not found.", { status: 404 });
+
     updateUserRole(userId, role);
+    if (user.role !== role) {
+      recordNotification(
+        db,
+        {
+          type: NotificationType.RoleChanged,
+          actorId: currentUserId,
+          userId,
+          newRole: role,
+        },
+        new Date()
+      );
+    }
     return { success: true };
   }
 

@@ -42,6 +42,16 @@ export enum TeamMemberRole {
   Member = "member",
 }
 
+export enum NotificationType {
+  RefundRequestDecided = "refund_request_decided",
+  DiscussionReply = "discussion_reply",
+  SeatClaimed = "seat_claimed",
+  NewDiscussionQuestion = "new_discussion_question",
+  CourseStatusChanged = "course_status_changed",
+  NewRefundRequest = "new_refund_request",
+  RoleChanged = "role_changed",
+}
+
 // ─── Tables ───
 
 export const users = sqliteTable("users", {
@@ -51,6 +61,9 @@ export const users = sqliteTable("users", {
   role: text("role").notNull().$type<UserRole>(),
   avatarUrl: text("avatar_url"),
   bio: text("bio"),
+  // When they last opened the Notification Menu or Notification Feed. The
+  // bell counts only unread Notifications created after it.
+  notificationsOpenedAt: text("notifications_opened_at"),
   createdAt: text("created_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
@@ -374,3 +387,36 @@ export const videoWatchEvents = sqliteTable("video_watch_events", {
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
 });
+
+// One row per recipient. Recipients are fixed when the event happens.
+export const notifications = sqliteTable(
+  "notifications",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    type: text("type").notNull().$type<NotificationType>(),
+    recipientId: integer("recipient_id")
+      .notNull()
+      .references(() => users.id),
+    actorId: integer("actor_id")
+      .notNull()
+      .references(() => users.id),
+    // What it is about. The table depends on the type: the user for Your role
+    // changed, the course for Course status changed, and so on.
+    subjectId: integer("subject_id").notNull(),
+    // A fact fixed when the event happened, such as the new role or the new
+    // course status. Anything that belongs to the subject is read from it when
+    // the row is shown instead.
+    detail: text("detail"),
+    createdAt: text("created_at")
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+    // Null while unread. Nothing marks a Notification unread again.
+    readAt: text("read_at"),
+  },
+  (table) => [
+    index("notifications_recipient_created_idx").on(
+      table.recipientId,
+      table.createdAt
+    ),
+  ]
+);

@@ -13,6 +13,7 @@ import {
   RefundStatus,
   QuestionType,
   TeamMemberRole,
+  NotificationType,
 } from "../app/db/schema";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -65,6 +66,7 @@ async function seed() {
 
   // Drop and recreate tables for a clean seed
   sqlite.exec(`
+    DROP TABLE IF EXISTS notifications;
     DROP TABLE IF EXISTS comments;
     DROP TABLE IF EXISTS course_ratings;
     DROP TABLE IF EXISTS video_watch_events;
@@ -2798,6 +2800,45 @@ This course is still in draft while the cluster examples are rewritten against t
 
   console.log("Created Marta's Refund Request on her Team Licence.");
 
+  // ─── Notifications ───
+  // Your role changed, read and unread. Emma was briefly made an Instructor
+  // and then moved back, so she has one of each; Priya read hers long ago.
+
+  const emma = studentByEmail("emma.wilson@student.dev");
+  db.insert(schema.notifications)
+    .values([
+      {
+        type: NotificationType.RoleChanged,
+        recipientId: emma.id,
+        actorId: admin.id,
+        subjectId: emma.id,
+        detail: UserRole.Instructor,
+        createdAt: daysAgo(3),
+        readAt: daysAgo(3),
+      },
+      {
+        type: NotificationType.RoleChanged,
+        recipientId: emma.id,
+        actorId: admin.id,
+        subjectId: emma.id,
+        detail: UserRole.Student,
+        createdAt: hoursAgo(2),
+        readAt: null,
+      },
+      {
+        type: NotificationType.RoleChanged,
+        recipientId: instructor3.id,
+        actorId: admin.id,
+        subjectId: instructor3.id,
+        detail: UserRole.Instructor,
+        createdAt: daysAgo(200),
+        readAt: daysAgo(199),
+      },
+    ])
+    .run();
+
+  console.log("Created Your role changed Notifications.");
+
   // ─── Flush watch events ───
   // Batched: the heartbeat makes these by far the largest table, and one
   // statement per row would dominate the seed's runtime.
@@ -2848,6 +2889,9 @@ This course is still in draft while the cluster examples are rewritten against t
   );
   console.log(
     `  Purchases: ${countRows(schema.purchases)} (${countRows(schema.purchases, gte(schema.purchases.createdAt, sevenDaysAgo))} in the last 7 days), spanning ${historyDays} days`
+  );
+  console.log(
+    `  Notifications: ${countRows(schema.notifications)} (${countRows(schema.notifications, isNull(schema.notifications.readAt))} unread)`
   );
   console.log(
     `  Teams: ${countRows(schema.teams)}, coupons: ${countRows(schema.coupons)} (${countRows(schema.coupons, isNotNull(schema.coupons.redeemedByUserId))} redeemed)`

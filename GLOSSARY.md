@@ -109,6 +109,26 @@ _Avoid_: Watch cap, Viewing threshold
 A message Cadence sends a person to tell them something that concerns them has happened.
 _Avoid_: Alert, Message, Activity
 
+**Notification Type**:
+One kind of Notification, such as Discussion Reply or Your role changed. A person chooses per Notification Type and per Channel whether they receive it.
+_Avoid_: Category, Event, Kind
+
+**Channel**:
+A way a Notification reaches a person: In-app or Email.
+_Avoid_: Medium, Transport
+
+**Notification Menu**:
+The short list of a person's newest Notifications that opens from the bell in the sidebar.
+_Avoid_: Dropdown, Popover
+
 **Notification Feed**:
-The place inside Cadence where a person sees their Notifications.
+The full page at `/notifications` listing every Notification a person has been sent.
 _Avoid_: Inbox, Activity feed
+
+**Account Email**:
+An email about a person's own account or own action, such as the verification link. It is not a Notification: it never appears In-app and can't be turned off.
+_Avoid_: Transactional email, System email
+
+**Verified**:
+A person who has proved they own their email address by clicking a link sent to it. Only Verified people get Notification Emails.
+_Avoid_: Confirmed, Validated
