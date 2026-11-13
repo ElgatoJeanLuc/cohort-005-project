@@ -11,6 +11,7 @@ import type { Route } from "./+types/instructor.$courseId";
 import { getCurrentUserId } from "~/lib/session";
 import { CourseStatus, UserRole } from "~/db/schema";
 import { db } from "~/db";
+import { deleteBookmarksAndNotesOnLessons } from "~/lib/bookmarks-notes.server";
 import {
   courses,
   categories,
@@ -234,7 +235,9 @@ function updateModuleTitle(id: number, title: string) {
 }
 
 function deleteModule(id: number) {
-  // Delete all lessons in this module first
+  // Delete all lessons in this module first, and the Bookmarks and Notes on them
+  const lessonIds = getLessonsByModule(id).map((lesson) => lesson.id);
+  deleteBookmarksAndNotesOnLessons(db, lessonIds);
   db.delete(lessons).where(eq(lessons.moduleId, id)).run();
   return db.delete(modules).where(eq(modules.id, id)).returning().get();
 }
@@ -302,6 +305,7 @@ function updateLessonTitle(id: number, title: string) {
 }
 
 function deleteLesson(id: number) {
+  deleteBookmarksAndNotesOnLessons(db, [id]);
   return db.delete(lessons).where(eq(lessons.id, id)).returning().get();
 }
 
