@@ -1,0 +1,33 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Typecheck, lint (ESLint, with existing violations in
+      # eslint-suppressions.json), tests.
+      - run: npm run check
+
+      # Most files predate Prettier being enforced, so only the files this
+      # pull request touches must be formatted.
+      - name: Check formatting of changed files
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --name-only --diff-filter=ACMR "origin/${{ github.base_ref }}...HEAD" \
+            | xargs --no-run-if-empty npx prettier --check --ignore-unknown
