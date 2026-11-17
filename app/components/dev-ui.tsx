@@ -67,112 +67,126 @@ export function DevUI({
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-72 rounded-lg border border-dashed bg-background/90 shadow-lg backdrop-blur-sm">
-      <div className="flex items-center justify-between border-b border-dashed px-3 py-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          DevUI · {users.length} users
-        </span>
-        <div className="flex gap-1">
-          <Button
-            size="icon-xs"
-            variant="ghost"
-            onClick={() => setMinimized(true)}
-          >
-            <ChevronDown className="size-3" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="p-3">
-        <div className="mb-2 text-xs text-muted-foreground">Current user</div>
-        {currentUser ? (
-          <div className="mb-3 flex items-center gap-2">
-            <span className="text-sm font-medium">{currentUser.name}</span>
-            <RoleBadge role={currentUser.role} />
-          </div>
-        ) : (
-          <div className="mb-3 text-sm text-muted-foreground italic">
-            No user selected
-          </div>
-        )}
-
-        <div className="relative">
-          <Button
-            size="sm"
-            variant="outline"
-            className="w-full justify-between"
-            onClick={() => setOpen(!open)}
-          >
-            Switch user
-            <ChevronDown
-              className={cn(
-                "size-3 transition-transform",
-                open && "rotate-180"
-              )}
-            />
-          </Button>
-
-          {open && (
-            <div className="absolute bottom-full mb-1 max-h-64 w-full overflow-y-auto rounded-md border bg-popover shadow-md">
-              {users.map((user) => (
-                <Form
-                  key={user.id}
-                  method="post"
-                  action={`/api/switch-user?redirectTo=${encodeURIComponent(location.pathname + location.search)}`}
-                >
-                  <input type="hidden" name="userId" value={user.id} />
-                  <button
-                    type="submit"
-                    className={cn(
-                      "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent",
-                      currentUser?.id === user.id && "bg-accent"
-                    )}
-                  >
-                    <span className="flex-1 truncate">{user.name}</span>
-                    <RoleBadge role={user.role} />
-                  </button>
-                </Form>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Country Override (PPP) */}
-        <div className="mt-3 border-t border-dashed pt-3">
-          <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Globe className="size-3" />
-            PPP Country
-          </div>
-          <Form
-            method="post"
-            action={`/api/set-dev-country?redirectTo=${encodeURIComponent(location.pathname + location.search)}`}
-          >
-            <select
-              name="country"
-              defaultValue={devCountry ?? ""}
-              onChange={(event) => event.target.form?.requestSubmit()}
-              className="w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+    <>
+      {/* A sibling of the panel, not a child: the panel's backdrop-blur
+          makes it the containing block for fixed children. */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40"
+          role="presentation"
+          onClick={() => setOpen(false)}
+        />
+      )}
+      <div className="fixed bottom-4 right-4 z-50 w-72 rounded-lg border border-dashed bg-background/90 shadow-lg backdrop-blur-sm">
+        <div className="flex items-center justify-between border-b border-dashed px-3 py-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            DevUI · {users.length} users
+          </span>
+          <div className="flex gap-1">
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              onClick={() => setMinimized(true)}
             >
-              <option value="">Auto-detect</option>
-              {countries.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.name} ({c.code})
-                </option>
-              ))}
-            </select>
-          </Form>
-          {devCountry && (
-            <div className="mt-1.5 text-xs text-muted-foreground">
-              Tier {countryTierInfo.tier} — {countryTierInfo.label}
-              {countryTierInfo.discount > 0 && (
-                <span className="ml-1 font-medium text-green-600">
-                  ({Math.round(countryTierInfo.discount * 100)}% discount)
-                </span>
-              )}
+              <ChevronDown className="size-3" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="p-3">
+          <div className="mb-2 text-xs text-muted-foreground">Current user</div>
+          {currentUser ? (
+            <div className="mb-3 flex items-center gap-2">
+              <span className="text-sm font-medium">{currentUser.name}</span>
+              <RoleBadge role={currentUser.role} />
+            </div>
+          ) : (
+            <div className="mb-3 text-sm text-muted-foreground italic">
+              No user selected
             </div>
           )}
+
+          <div className="relative">
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full justify-between"
+              onClick={() => setOpen(!open)}
+            >
+              Switch user
+              <ChevronDown
+                className={cn(
+                  "size-3 transition-transform",
+                  open && "rotate-180"
+                )}
+              />
+            </Button>
+
+            {open && (
+              <div className="absolute bottom-full mb-1 max-h-64 w-full overflow-y-auto rounded-md border bg-popover shadow-md">
+                {users.map((user) => (
+                  <Form
+                    key={user.id}
+                    method="post"
+                    action={`/api/switch-user?redirectTo=${encodeURIComponent(location.pathname + location.search)}`}
+                    // The action redirects back to this page, so the DevUI
+                    // stays mounted and would keep the list open.
+                    onSubmit={() => setOpen(false)}
+                  >
+                    <input type="hidden" name="userId" value={user.id} />
+                    <button
+                      type="submit"
+                      className={cn(
+                        "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent",
+                        currentUser?.id === user.id && "bg-accent"
+                      )}
+                    >
+                      <span className="flex-1 truncate">{user.name}</span>
+                      <RoleBadge role={user.role} />
+                    </button>
+                  </Form>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Country Override (PPP) */}
+          <div className="mt-3 border-t border-dashed pt-3">
+            <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Globe className="size-3" />
+              PPP Country
+            </div>
+            <Form
+              method="post"
+              action={`/api/set-dev-country?redirectTo=${encodeURIComponent(location.pathname + location.search)}`}
+            >
+              <select
+                name="country"
+                defaultValue={devCountry ?? ""}
+                onChange={(event) => event.target.form?.requestSubmit()}
+                className="w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              >
+                <option value="">Auto-detect</option>
+                {countries.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name} ({c.code})
+                  </option>
+                ))}
+              </select>
+            </Form>
+            {devCountry && (
+              <div className="mt-1.5 text-xs text-muted-foreground">
+                Tier {countryTierInfo.tier} — {countryTierInfo.label}
+                {countryTierInfo.discount > 0 && (
+                  <span className="ml-1 font-medium text-green-600">
+                    ({Math.round(countryTierInfo.discount * 100)}% discount)
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
