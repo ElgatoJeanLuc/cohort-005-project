@@ -247,12 +247,15 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-4">
           {heroActions({ signedIn: currentUser !== null }).map((action) => (
-            <Button key={action.to} asChild size="lg" variant={action.variant}>
+            <Button
+              key={action.to}
+              asChild
+              size="lg"
+              variant={action.primary ? "default" : "outline"}
+            >
               <Link to={action.to}>
                 {action.label}
-                {action.variant === "default" && (
-                  <ArrowRight className="ml-2 size-4" />
-                )}
+                {action.primary && <ArrowRight className="ml-2 size-4" />}
               </Link>
             </Button>
           ))}

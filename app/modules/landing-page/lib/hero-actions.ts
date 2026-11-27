@@ -1,28 +1,33 @@
 export type HeroAction = {
   label: string;
   to: string;
-  variant: "default" | "outline";
+  /** The one action the hero leads with. */
+  primary: boolean;
 };
 
 const browseCourses: HeroAction = {
   label: "Browse Courses",
   to: "/courses",
-  variant: "default",
+  primary: true,
 };
 
 const signUp: HeroAction = {
   label: "Sign Up",
   to: "/signup",
-  variant: "outline",
+  primary: false,
 };
 
 const goToDashboard: HeroAction = {
   label: "Go to Dashboard",
   to: "/dashboard",
-  variant: "outline",
+  primary: false,
 };
 
-export function heroActionsFor(signedIn: boolean): HeroAction[] {
+/**
+ * The calls to action in the landing page hero: browsing first, then the
+ * next step that fits the visitor.
+ */
+export function heroActions(visitor: { signedIn: boolean }): HeroAction[] {
   // A signed-in visitor already has an account, so "Sign Up" would be a dead end.
-  return [browseCourses, signedIn ? goToDashboard : signUp];
+  return [browseCourses, visitor.signedIn ? goToDashboard : signUp];
 }
