@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { CourseImage } from "~/components/course-image";
 import { DevUI } from "~/components/dev-ui";
+import { heroActions } from "~/modules/landing-page";
 import { getCurrentUserId, getDevCountry } from "~/lib/session";
 import { getCountryTierInfo, COUNTRIES } from "~/lib/ppp";
 import { eq, like, and, or, sql } from "drizzle-orm";
@@ -234,44 +235,48 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-6 py-24 text-center">
-        <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
+      <section className="mx-auto max-w-6xl px-6 py-24">
+        <h1 className="max-w-3xl text-5xl font-bold tracking-tight sm:text-6xl">
           Learn to code,
           <br />
           <span className="text-muted-foreground">at your own pace</span>
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+        <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
           Structured courses built by experienced instructors. Track your
           progress, take quizzes, and build real-world skills.
         </p>
-        <div className="mt-10 flex items-center justify-center gap-4">
-          <Button asChild size="lg">
-            <Link to="/courses">
-              Browse Courses
-              <ArrowRight className="ml-2 size-4" />
-            </Link>
-          </Button>
+        <div className="mt-10 flex flex-wrap items-center gap-4">
+          {heroActions({ signedIn: currentUser !== null }).map((action) => (
+            <Button key={action.to} asChild size="lg" variant={action.variant}>
+              <Link to={action.to}>
+                {action.label}
+                {action.variant === "default" && (
+                  <ArrowRight className="ml-2 size-4" />
+                )}
+              </Link>
+            </Button>
+          ))}
         </div>
       </section>
 
       <section className="border-y border-border bg-muted/50 py-16">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 sm:grid-cols-3">
-          <div className="text-center">
-            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10">
+          <div>
+            <div className="mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10">
               <BookOpen className="size-6 text-primary" />
             </div>
             <p className="text-2xl font-bold">{totalCourses}</p>
             <p className="text-sm text-muted-foreground">Available Courses</p>
           </div>
-          <div className="text-center">
-            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10">
+          <div>
+            <div className="mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10">
               <GraduationCap className="size-6 text-primary" />
             </div>
             <p className="text-2xl font-bold">{totalCategories}</p>
             <p className="text-sm text-muted-foreground">Categories</p>
           </div>
-          <div className="text-center">
-            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10">
+          <div>
+            <div className="mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10">
               <Users className="size-6 text-primary" />
             </div>
             <p className="text-2xl font-bold">Self-paced</p>
