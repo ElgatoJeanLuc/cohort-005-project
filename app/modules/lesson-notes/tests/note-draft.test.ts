@@ -48,10 +48,23 @@ describe("describeNoteDraft", () => {
     ).toMatchObject({ status: "unsaved", canSave: true });
   });
 
-  it("is empty when the Student clears a saved note", () => {
+  it("is cleared, and cannot be saved, when the Student empties a saved note", () => {
     expect(
-      describeNoteDraft({ draft: "", saved: "Use Result<T>" })
-    ).toMatchObject({ status: "empty", canSave: false });
+      describeNoteDraft({ draft: " \n", saved: "Use Result<T>" })
+    ).toMatchObject({ status: "cleared", canSave: false });
+  });
+
+  it("counts the draft as saveNote will store it, without surrounding whitespace", () => {
+    const draft = describeNoteDraft({
+      draft: `  ${"a".repeat(MAX_NOTE_LENGTH)}\n`,
+      saved: null,
+    });
+
+    expect(draft).toMatchObject({
+      characters: MAX_NOTE_LENGTH,
+      overLimit: false,
+      canSave: true,
+    });
   });
 
   it("can be saved at exactly the limit", () => {
