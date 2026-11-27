@@ -71,6 +71,14 @@ describe("reading the quiz", () => {
     ]);
   });
 
+  it("gives each question only its own options", () => {
+    const quiz = f.viewer.getQuizWithQuestions(quizId);
+
+    expect(
+      quiz?.questions.map((q) => q.options.map((o) => o.id).sort())
+    ).toEqual(questions.map((q) => [q.wrong, q.right].sort()));
+  });
+
   it("returns null for an unknown quiz", () => {
     expect(f.viewer.getQuizWithQuestions(9999)).toBeNull();
   });
@@ -124,6 +132,40 @@ describe("computeResult", () => {
       questionId: questions[1].id,
       correct: false,
       selectedOptionId: null,
+      correctOptionId: null,
+    });
+  });
+
+  it("scores an answer as wrong when its question has no correct option", () => {
+    const question = f.db
+      .insert(schema.quizQuestions)
+      .values({
+        quizId,
+        questionText: "Unkeyed",
+        questionType: QuestionType.TrueFalse,
+        position: 3,
+      })
+      .returning()
+      .get();
+    const option = f.db
+      .insert(schema.quizOptions)
+      .values({
+        questionId: question.id,
+        optionText: "Maybe",
+        isCorrect: false,
+      })
+      .returning()
+      .get();
+
+    const result = f.viewer.computeResult(studentId, quizId, {
+      ...answers(2),
+      [question.id]: option.id,
+    });
+
+    expect(result?.questionResults[2]).toEqual({
+      questionId: question.id,
+      correct: false,
+      selectedOptionId: option.id,
       correctOptionId: null,
     });
   });
