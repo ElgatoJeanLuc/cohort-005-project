@@ -95,6 +95,14 @@ module.exports = {
       to: { path: ["^app/db/", "^node_modules/(drizzle-orm|better-sqlite3)/"] },
     },
     {
+      name: "modules-no-ui",
+      comment:
+        "Dependencies point from the UI to the data layer, never back. A module owns data and rules, so it may not import a component or a route. Move the shared type into the module and let the component import it.",
+      severity: "error",
+      from: { path: `^${R}/` },
+      to: { path: ["^app/components/", "^app/routes/"] },
+    },
+    {
       name: "components-no-db-connection",
       comment:
         "Components ship to the browser, so they may not open the database connection: it pulls better-sqlite3 into the client bundle and breaks hydration. Get data through a loader instead.",

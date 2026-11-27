@@ -113,3 +113,37 @@ Name and extract until a comment is unnecessary. A comment earns its place
 only for a _why_ the code cannot express: a constraint, a decision, a link to
 the ADR behind it. A comment that restates _what_ the code does goes stale the
 first time the code changes.
+
+## Catch the error you expect
+
+A `catch` handles one named failure and rethrows the rest. A catch-all that
+returns `null` turns a bug into a missing value, and the route can only
+report a generic 500.
+
+```ts
+try {
+  return await scoreQuiz(quizId, answers);
+} catch (error) {
+  if (error instanceof QuizNotFoundError) return null;
+  throw error;
+}
+```
+
+## A GET loader reads
+
+A loader answers a GET, and a GET can be repeated by a prefetch, a refresh or
+a crawler. A write belongs in an action. A loader that records progress marks
+a lesson started for a learner who only hovered over the link.
+
+## Declare a shared type once
+
+A type used by more than one component is declared in one place and imported
+by the rest. Two copies of `LessonLoaderData` agree until the day one of them
+gains a field.
+
+## Keep a refactor out of a feature PR
+
+A feature PR carries the refactor its change needs, in its own commit with the
+reason in the message. A refactor the change does not need gets its own PR. A
+reviewer reads a 2,400-line restructure and a 300-line restyle at the cost of
+reading both as one.
