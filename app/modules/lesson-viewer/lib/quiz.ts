@@ -32,6 +32,10 @@ export function createQuizQueries(db: Db) {
       .get();
   }
 
+  function getQuizById(quizId: number) {
+    return db.select().from(quizzes).where(eq(quizzes.id, quizId)).get();
+  }
+
   function getQuizWithQuestions(quizId: number) {
     const quiz = db.select().from(quizzes).where(eq(quizzes.id, quizId)).get();
     if (!quiz) return null;
@@ -186,6 +190,7 @@ export function createQuizQueries(db: Db) {
 
   return {
     getQuizByLessonId,
+    getQuizById,
     getQuizWithQuestions,
     getBestAttempt,
     computeResult,

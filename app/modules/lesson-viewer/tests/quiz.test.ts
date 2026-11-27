@@ -54,6 +54,11 @@ describe("reading the quiz", () => {
     expect(f.viewer.getQuizByLessonId(f.lessons.second.id)).toBeUndefined();
   });
 
+  it("finds a quiz by id, with the lesson it belongs to", () => {
+    expect(f.viewer.getQuizById(quizId)?.lessonId).toBe(f.lessons.first.id);
+    expect(f.viewer.getQuizById(quizId + 1000)).toBeUndefined();
+  });
+
   it("returns the questions in order, each with its options", () => {
     const quiz = f.viewer.getQuizWithQuestions(quizId);
 
