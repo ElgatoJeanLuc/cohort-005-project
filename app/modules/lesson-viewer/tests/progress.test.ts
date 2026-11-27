@@ -3,6 +3,8 @@ import * as schema from "~/db/schema";
 import { LessonProgressStatus } from "~/db/schema";
 import { seedLessonViewer, type LessonViewerFixture } from "./fixtures";
 
+const NOW = new Date(2026, 9, 6, 12, 0, 0);
+
 let f: LessonViewerFixture;
 let studentId: number;
 
@@ -41,10 +43,10 @@ describe("marking progress", () => {
   });
 
   it("marks a lesson complete, with a completion time", () => {
-    const row = f.viewer.markLessonComplete(studentId, f.lessons.first.id);
+    const row = f.viewer.markLessonComplete(studentId, f.lessons.first.id, NOW);
 
     expect(row.status).toBe(LessonProgressStatus.Completed);
-    expect(row.completedAt).not.toBeNull();
+    expect(row.completedAt).toBe(NOW.toISOString());
   });
 
   it("completes a lesson already in progress without adding a second row", () => {
@@ -54,16 +56,17 @@ describe("marking progress", () => {
     );
     const completed = f.viewer.markLessonComplete(
       studentId,
-      f.lessons.first.id
+      f.lessons.first.id,
+      NOW
     );
 
     expect(completed.id).toBe(started.id);
     expect(completed.status).toBe(LessonProgressStatus.Completed);
-    expect(completed.completedAt).not.toBeNull();
+    expect(completed.completedAt).toBe(NOW.toISOString());
   });
 
   it("does not move a completed lesson back to in progress", () => {
-    f.viewer.markLessonComplete(studentId, f.lessons.first.id);
+    f.viewer.markLessonComplete(studentId, f.lessons.first.id, NOW);
     const row = f.viewer.markLessonInProgress(studentId, f.lessons.first.id);
 
     expect(row.status).toBe(LessonProgressStatus.Completed);
@@ -87,10 +90,10 @@ describe("marking progress", () => {
 
 describe("getLessonProgressForCourse", () => {
   it("returns this Student's progress for this course only", () => {
-    f.viewer.markLessonComplete(studentId, f.lessons.first.id);
+    f.viewer.markLessonComplete(studentId, f.lessons.first.id, NOW);
     f.viewer.markLessonInProgress(studentId, f.lessons.third.id);
-    f.viewer.markLessonComplete(studentId, f.lessons.otherLesson.id);
-    f.viewer.markLessonComplete(f.base.instructor.id, f.lessons.second.id);
+    f.viewer.markLessonComplete(studentId, f.lessons.otherLesson.id, NOW);
+    f.viewer.markLessonComplete(f.base.instructor.id, f.lessons.second.id, NOW);
 
     const rows = f.viewer.getLessonProgressForCourse(
       studentId,

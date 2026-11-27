@@ -51,7 +51,7 @@ export function createProgressQueries(db: Db) {
       .all();
   }
 
-  function markLessonComplete(userId: number, lessonId: number) {
+  function markLessonComplete(userId: number, lessonId: number, now: Date) {
     const existing = getLessonProgress(userId, lessonId);
 
     if (existing) {
@@ -59,7 +59,7 @@ export function createProgressQueries(db: Db) {
         .update(lessonProgress)
         .set({
           status: LessonProgressStatus.Completed,
-          completedAt: new Date().toISOString(),
+          completedAt: now.toISOString(),
         })
         .where(eq(lessonProgress.id, existing.id))
         .returning()
@@ -72,7 +72,7 @@ export function createProgressQueries(db: Db) {
         userId,
         lessonId,
         status: LessonProgressStatus.Completed,
-        completedAt: new Date().toISOString(),
+        completedAt: now.toISOString(),
       })
       .returning()
       .get();
