@@ -10,6 +10,7 @@ import { db } from "~/db";
 import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
+import { RefundStatusBadge } from "~/components/refund-status-badge";
 import { AlertTriangle, Receipt } from "lucide-react";
 import { data, isRouteErrorResponse, Link } from "react-router";
 import { formatPrice } from "~/lib/utils";
@@ -263,12 +264,15 @@ function RefundRequestCard({
       <CardContent className="space-y-4 p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <Link
-              to={`/courses/${refundRequest.courseSlug}`}
-              className="font-semibold hover:underline"
-            >
-              {refundRequest.courseTitle}
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/courses/${refundRequest.courseSlug}`}
+                className="font-semibold hover:underline"
+              >
+                {refundRequest.courseTitle}
+              </Link>
+              <RefundStatusBadge status={refundRequest.status} />
+            </div>
             <p className="text-sm text-muted-foreground">
               {refundRequest.buyerName} · {refundRequest.buyerEmail} · raised{" "}
               {new Date(refundRequest.requestedAt).toLocaleDateString()}
