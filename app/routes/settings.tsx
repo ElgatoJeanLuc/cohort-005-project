@@ -18,6 +18,7 @@ import { eq } from "drizzle-orm";
 import { formatPrice } from "~/lib/utils";
 import { listRefundRequestsForBuyer } from "~/lib/refunds.server";
 import { Switch } from "~/components/ui/switch";
+import { RefundStatusBadge } from "~/components/refund-status-badge";
 import {
   defaultNotifications,
   tolerateNotificationFailure,
@@ -368,37 +369,6 @@ function NotificationSwitch({
         }
       />
     </div>
-  );
-}
-
-const REFUND_STATUS_BADGES: Record<
-  RefundStatus,
-  { label: string; className: string }
-> = {
-  [RefundStatus.Open]: {
-    label: "Open",
-    className:
-      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-  },
-  [RefundStatus.Approved]: {
-    label: "Approved",
-    className:
-      "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  },
-  [RefundStatus.Declined]: {
-    label: "Declined",
-    className: "bg-muted text-muted-foreground",
-  },
-};
-
-function RefundStatusBadge({ status }: { status: RefundStatus }) {
-  const badge = REFUND_STATUS_BADGES[status];
-  return (
-    <span
-      className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.className}`}
-    >
-      {badge.label}
-    </span>
   );
 }
 

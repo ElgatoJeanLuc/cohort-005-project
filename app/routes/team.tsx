@@ -25,6 +25,7 @@ import {
   type SeatAvailability,
 } from "~/lib/refunds.server";
 import { formatPrice } from "~/lib/utils";
+import { refundStatusBadge } from "~/modules/refund-status";
 
 function getTeamForAdmin(userId: number) {
   const membership = db
@@ -378,12 +379,16 @@ function TeamLicenceRow({ licence }: { licence: TeamLicence }) {
             </p>
           </div>
           {refundRequest?.status === RefundStatus.Open && (
-            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${refundStatusBadge(RefundStatus.Open).className}`}
+            >
               Refund requested — seats on hold
             </span>
           )}
           {refundRequest?.status === RefundStatus.Approved && (
-            <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${refundStatusBadge(RefundStatus.Approved).className}`}
+            >
               Refunded
             </span>
           )}
@@ -401,7 +406,9 @@ function TeamLicenceRow({ licence }: { licence: TeamLicence }) {
 
         {refundRequest?.status === RefundStatus.Declined &&
           refundRequest.decisionNote && (
-            <p className="mt-3 rounded-md bg-muted p-2 text-sm">
+            <p
+              className={`mt-3 rounded-md p-2 text-sm ${refundStatusBadge(RefundStatus.Declined).className}`}
+            >
               <span className="font-medium">Refund declined: </span>
               {refundRequest.decisionNote}
             </p>
