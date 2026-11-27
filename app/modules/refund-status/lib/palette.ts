@@ -1,10 +1,10 @@
 import { RefundStatus } from "~/db/schema";
 
-export type RefundStatusBadge = { label: string; className: string };
+export type RefundStatusStyle = { label: string; className: string };
 
 // Open is blue rather than amber: amber already means a broken refund rule on
 // the admin page, and an Open badge must not read as a warning.
-export const REFUND_STATUS_BADGES: Record<RefundStatus, RefundStatusBadge> = {
+export const REFUND_STATUS_BADGES: Record<RefundStatus, RefundStatusStyle> = {
   [RefundStatus.Open]: {
     label: "Open",
     className:
